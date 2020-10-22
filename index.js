@@ -25,3 +25,6 @@ mongoose.connect(
     console.log("MongoDB connection established");
 });
 
+// set up routes
+
+app.use("/users", require("./routes/userRouter"));
