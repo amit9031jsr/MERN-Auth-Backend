@@ -20,15 +20,21 @@ router.post("/register", async (req, res) => {
         if (!email || !password || !passwordCheck) // Required field
             return res
                 .status(400)
-                .json({ msg: "All fields are required." });
+                .json({
+                    msg: "All fields are required."
+                });
         if (password.length < 5) // Password not less than 5 character
             return res
                 .status(400)
-                .json({ msg: "The password must be atleast 5 characters." });
+                .json({
+                    msg: "The password must be atleast 5 characters."
+                });
         if (password !== passwordCheck) // Both password field should be same
             return res
                 .status(400)
-                .json({ msg: "Both password should be same." });
+                .json({
+                    msg: "Both password should be same."
+                });
 
         // Checked if user already exist
         const existingUser = await User.findOne({
@@ -37,7 +43,9 @@ router.post("/register", async (req, res) => {
         if (existingUser)
             return res
                 .status(400)
-                .json({ msg: "Email ID already exists." });
+                .json({
+                    msg: "Email ID already exists."
+                });
 
         // If no displayName set it to email
         if (!displayName) displayName = email;
@@ -63,27 +71,40 @@ router.post("/register", async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const {email, password} = req.body;
+        const {
+            email,
+            password
+        } = req.body;
 
         // Validation
         if (!email || !password) // Required field
             return res
                 .status(400)
-                .json({ msg: "All fields are required." });
+                .json({
+                    msg: "All fields are required."
+                });
 
-        const user = await User.findOne({ email: email });
-        if(!user)
+        const user = await User.findOne({
+            email: email
+        });
+        if (!user)
             return res
                 .status(400)
-                .json({ msg: "No account with this email has been registered." });
+                .json({
+                    msg: "No account with this email has been registered."
+                });
 
         const isMatch = await bcrypt.compare(password, user.password)
-        if(!isMatch)
+        if (!isMatch)
             return res
                 .status(400)
-                .json({ msg: "Invalid credentials." });
-        
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+                .json({
+                    msg: "Invalid credentials."
+                });
+
+        const token = jwt.sign({
+            id: user._id
+        }, process.env.JWT_SECRET);
         res.json({
             token,
             user: {
@@ -110,5 +131,23 @@ router.delete("/delete", auth, async (req, res) => {
     }
 })
 
+router.post("/tokenIsValid", async (req, res) => {
+    try {
+        const token = req.header("x-auth-token");
+        if (!token) return res.json(false);
+
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
+        if (!verified) return res.json(false);
+
+        const user = await User.findById(verified.id);
+        if(!user) return res.json(false);
+
+        return res.json(true);
+    } catch (err) {
+        res.status(500).json({
+            error: err.message
+        });
+    }
+});
 
 module.exports = router;
