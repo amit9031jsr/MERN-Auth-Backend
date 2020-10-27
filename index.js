@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());    //middleware
 app.use(cors());    //middleware
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started at port no ${PORT}`));
 
 // setup mongoose
